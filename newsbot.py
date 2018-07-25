@@ -22,13 +22,13 @@ def message(bot, update):
     print('Received an update')
     global context
 
-    conversation = ConversationV1(username='161a18e1-8ddc-404c-894b-26470e295d90',  # TODO
-                                  password='d07Jb1MQduZM',  # TODO
+    conversation = ConversationV1(username='b4e9efc3-5841-4415-843c-113f0674416b',  # TODO
+                                  password='lduCs2dmYAyQ',  # TODO
                                   version='2018-02-16')
 
     # get response from watson
     response = conversation.message(
-        workspace_id='cb90b423-b0c4-45b5-9ee2-002f8ebdd6de',  # TODO
+        workspace_id='36b6b197-2da6-4e71-9f23-a13d85110f84',  # TODO
         input={'text': update.message.text},
         context=context)
     print(json.dumps(response, indent=2))
@@ -41,13 +41,16 @@ def message(bot, update):
     ret=''
     esp=''
     es=''
-    for i in response['intents']:
-        	es += i['intent']
-    if es!='Bot_Control_Approve_Response':
+    source=''
+    
+    for text in response['intents']:
+        	es += text['intent']
+    if es!='Bot_Control_Approve_Response' and es!='final':
 	for text in response['output']['text']:
         	resp += text
     	update.message.reply_text(resp)
-    else: 
+    elif es!='final':
+	#update.message.reply_text("http://127.0.0.1:5000/")
 	 for text in response['output']['text']:
         	resp += text
          count=response['context']['count']
@@ -55,8 +58,22 @@ def message(bot, update):
          category=response['context']['category']
          n=requests.get('https://newsapi.org/v2/top-headlines?country='+count+'&category='+category+'&apiKey=9ef6f45b13b94839b709d56d1b728ab6')
 	 obj=n.json()
-	 ret+=str(obj['articles'][10]['url'])
+	 for i in range(0,19):
+		ret+=str(i+1)+':  '+str(obj['articles'][i]['title'])+'\n'+'\n'
 	 update.message.reply_text(resp+'\n'+'\n'+ret)
+    else:
+	 num=response['context']['number']
+	 count=response['context']['count']
+	 
+         category=response['context']['category']
+         n=requests.get('https://newsapi.org/v2/top-headlines?country='+count+'&category='+category+'&apiKey=9ef6f45b13b94839b709d56d1b728ab6')
+	 obj=n.json()
+	 source='we have got this news from '+str(obj['articles'][num-1]['source']['name'])+'\n'+'\n'
+	 ret+=str(obj['articles'][num-1]['url'])
+	 update.message.reply_text(source+ret)
+	
+    
+	
     
 	
 
@@ -68,7 +85,7 @@ def message(bot, update):
 
 def main():
     # Create the Updater and pass it your bot's token.
-    updater = Updater('639931768:AAE4yJYO_HlMG7QL4RPwa0c4tScm3A-bQo4')  #TODO
+    updater = Updater('630960342:AAGOpUpEw10u9Vd6gWaVUx5c4Fuy1unUbOc')  #TODO
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
